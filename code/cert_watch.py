@@ -163,23 +163,13 @@ if __name__ == "__main__":
     # Add SNI hostnames for IIS bindings whenever possible.
     TARGETS = [
         # DEV
-        Target("dev (10.91.100.5) - bitwarden", "10.91.100.5", 443, sni=None),
-        Target("dev (10.91.100.5) - proxy", "10.91.100.5", 443, sni=None),
-        Target("dev (10.91.100.5) - reportserver", "10.91.100.5", 443, sni=None),
-
-        Target("dev (10.91.100.6) - bitwarden", "10.91.100.6", 443, sni=None),
-        Target("dev (10.91.100.6) - proxy", "10.91.100.6", 443, sni=None),
-        Target("dev (10.91.100.6) - reportserver", "10.91.100.6", 443, sni=None),
+        Target("dev (server-ip) - bitwarden", "server-ip", port-number, sni=None)
 
         # TEST
-        Target("test (10.255.91.7) - bitwarden", "10.255.91.7", 443, sni=None),
-        Target("test (10.255.91.6) - proxy", "10.255.91.6", 443, sni=None),
-        Target("test (10.255.255.24) - reportserver", "10.255.255.24", 443, sni=None),
-        Target("test (10.255.255.25) - reportserver", "10.255.255.25", 443, sni=None),
+        Target("test (server-ip) - bitwarden", "server-ip", port-number, sni=None)
 
         # PROD
-        Target("prod (10.100.0.78) - bitwarden", "10.100.0.78", 443, sni=None),
-        Target("prod (10.100.0.82) - proxy/reportserver", "10.100.0.82", 443, sni=None),
+        Target("prod (server-ip) - bitwarden", "server-ip", port-number, sni=None)
     ]
 
     raise SystemExit(main(TARGETS, warn_days=int(os.environ.get("WARN_DAYS", "30"))))
