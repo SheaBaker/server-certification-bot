@@ -1,0 +1,98 @@
+---
+- name: https cert expiry check (IIS/DigiCert)
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    warn_days: 50000
+    webex_bot_token: "YOUR_BOT_TOKEN_HERE"
+    webex_room_id: "YOUR_ROOM_ID_HERE"
+
+    targets:
+      # development environment
+      - { name: "Dev NS2CP-VM Default Web Site",      host: "10.91.100.5",    port: 443, server_name: "api.wwwoodproducts.com" }
+      - { name: "Dev WS1CP-VM Default Web Site",      host: "10.91.100.6",    port: 443, server_name: "apps.wwwoodproducts.com" }
+      - { name: "Dev Report Server",                  host: "10.91.100.66",   port: 443, server_name: "sqlasp-vm" }
+
+      # testing environment
+      - { name: "Testing NS2QCP-VM Default Web Site", host: "10.255.91.7",    port: 443, server_name: "api.wwwoodproducts.com" }
+      - { name: "Testing WS1QCP-VM Default Web Site", host: "10.255.91.6",    port: 443, server_name: "apps.wwwoodproducts.com" }
+      - { name: "Testing WS1QC-VM Default Web Site",  host: "10.255.255.24",  port: 443, server_name: "apps.wwwoodproducts.com" }
+      - { name: "Testing NS2QC-VM Default Web Site",  host: "10.255.255.25",  port: 443, server_name: "api.wwwoodproducts.com" }
+
+      # production environment
+      - { name: "Prod NS1-VM Default Web Site",       host: "10.100.0.78",    port: 443, server_name: "api.wwwoodproducts.com" }
+      - { name: "Prod WS1-VM Default Web Site",       host: "10.100.0.82",    port: 443, server_name: "apps.wwwoodproducts.com" }
+      - { name: "Prod Report Server",                 host: "10.100.107.37",  port: 443, server_name: "sqlas-vm" }
+
+  tasks:
+    - name: get certs (no SNI)
+      community.crypto.get_certificate:
+        host: "{{ item.host }}"
+        port: "{{ item.port }}"
+        timeout: 10
+      loop: "{{ targets }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: (item.server_name | default('') | string | length) == 0
+      register: certs_no_sni
+      ignore_errors: yes
+
+    - name: get certs (with SNI)
+      community.crypto.get_certificate:
+        host: "{{ item.host }}"
+        port: "{{ item.port }}"
+        server_name: "{{ item.server_name }}"
+        timeout: 10
+      loop: "{{ targets }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: (item.server_name | default('') | string | length) > 0
+      register: certs_sni
+      ignore_errors: yes
+
+    - name: combine results
+      set_fact:
+        certs:
+          results: "{{ (certs_no_sni.results | default([])) + (certs_sni.results | default([])) }}"
+
+    - name: prepare cert data for python
+      set_fact:
+        cert_data: "{{ cert_data | default([]) + [{'name': item.item.name, 'endpoint': item.item.host ~ ':' ~ item.item.port ~ ((' SNI ' ~ item.item.server_name) if item.item.server_name | default('') | length > 0 else ''), 'not_after': item.not_after | default(''), 'failed': item.failed}] }}"
+      loop: "{{ certs.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+
+    - name: write cert data to temp file
+      copy:
+        content: "{{ cert_data | to_json }}"
+        dest: /home/ansible/cert_input.json
+
+    - name: run expiry check
+      command: python3 /home/ansible/check_expiry.py /home/ansible/cert_input.json {{ warn_days }}
+      register: expiry_output
+
+    - name: parse expiry results
+      set_fact:
+        expiry_result: "{{ expiry_output.stdout | from_json }}"
+
+    - name: print report to console
+      debug:
+        msg: "{{ expiry_result.message }}"
+
+    - name: send webex notification
+      uri:
+        url: "https://webexapis.com/v1/messages"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ webex_bot_token }}"
+        body_format: json
+        body:
+          roomId: "{{ webex_room_id }}"
+          markdown: "{{ expiry_result.message }}"
+      when: webex_bot_token | length > 0
+
+    - name: fail if any certs are expiring or errored
+      fail:
+        msg: "Certificate alerts detected"
+      when: expiry_result.has_alerts
