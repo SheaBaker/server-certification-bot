@@ -10,20 +10,13 @@
 
     targets:
       # development environment
-      - { name: "Dev NS2CP-VM Default Web Site",      host: "10.91.100.5",    port: 443, server_name: "api.wwwoodproducts.com" }
-      - { name: "Dev WS1CP-VM Default Web Site",      host: "10.91.100.6",    port: 443, server_name: "apps.wwwoodproducts.com" }
-      - { name: "Dev Report Server",                  host: "10.91.100.66",   port: 443, server_name: "sqlasp-vm" }
+      - { name: "server-name",      host: "server-ip",    port: port-number, server_name: "server.domain.com" }
 
       # testing environment
-      - { name: "Testing NS2QCP-VM Default Web Site", host: "10.255.91.7",    port: 443, server_name: "api.wwwoodproducts.com" }
-      - { name: "Testing WS1QCP-VM Default Web Site", host: "10.255.91.6",    port: 443, server_name: "apps.wwwoodproducts.com" }
-      - { name: "Testing WS1QC-VM Default Web Site",  host: "10.255.255.24",  port: 443, server_name: "apps.wwwoodproducts.com" }
-      - { name: "Testing NS2QC-VM Default Web Site",  host: "10.255.255.25",  port: 443, server_name: "api.wwwoodproducts.com" }
+      - { name: "server-name",      host: "server-ip",    port: port-number, server_name: "server.domain.com" }
 
       # production environment
-      - { name: "Prod NS1-VM Default Web Site",       host: "10.100.0.78",    port: 443, server_name: "api.wwwoodproducts.com" }
-      - { name: "Prod WS1-VM Default Web Site",       host: "10.100.0.82",    port: 443, server_name: "apps.wwwoodproducts.com" }
-      - { name: "Prod Report Server",                 host: "10.100.107.37",  port: 443, server_name: "sqlas-vm" }
+      - { name: "server-name",      host: "server-ip",    port: port-number, server_name: "server.domain.com" }
 
   tasks:
     - name: get certs (no SNI)
