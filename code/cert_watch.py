@@ -162,14 +162,14 @@ def main(targets: List[Target], warn_days: int = 30) -> int:
 if __name__ == "__main__":
     # Add SNI hostnames for IIS bindings whenever possible.
     TARGETS = [
-        # DEV
-        Target("dev (server-ip) - bitwarden", "server-ip", port-number, sni=None)
+        # environment 1
+        Target("e1 (server-ip) - description", "server-ip", port-number, sni=None)
 
-        # TEST
-        Target("test (server-ip) - bitwarden", "server-ip", port-number, sni=None)
+        # environment 2
+        Target("e2 (server-ip) - description", "server-ip", port-number, sni=None)
 
-        # PROD
-        Target("prod (server-ip) - bitwarden", "server-ip", port-number, sni=None)
+        # environment 3
+        Target("e3 (server-ip) - description", "server-ip", port-number, sni=None)
     ]
 
     raise SystemExit(main(TARGETS, warn_days=int(os.environ.get("WARN_DAYS", "30"))))
