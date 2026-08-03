@@ -4,7 +4,7 @@
   gather_facts: no
 
   vars:
-    warn_days: 50000
+    warn_days: 30
     webex_bot_token: "YOUR_BOT_TOKEN_HERE"
     webex_room_id: "YOUR_ROOM_ID_HERE"
 
