@@ -59,10 +59,10 @@
     - name: write cert data to temp file
       copy:
         content: "{{ cert_data | to_json }}"
-        dest: /home/ansible/cert_input.json
+        dest: file-directory.json
 
     - name: run expiry check
-      command: python3 /home/ansible/check_expiry.py /home/ansible/cert_input.json {{ warn_days }}
+      command: python3 file-directory.py file-directory.json {{ warn_days }}
       register: expiry_output
 
     - name: parse expiry results
