@@ -20,6 +20,7 @@ NOTE: The bot can only post to spaces it has been added to as a member.
 
 ### Step 3: Get the Room ID
 The Room ID tells the bot which space to post messages to.
+
 Command line:
 
 bash
